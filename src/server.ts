@@ -1,4 +1,4 @@
-import { SetupApplication } from './app/app';
+import { SetupApplication } from './app';
 
 class Server {
     static start(): void {
