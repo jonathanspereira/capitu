@@ -5,5 +5,34 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DIRECT_URL")
+}
+
+model users {
+  id               Int       @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @default(autoincrement())
+  name             String
+  email            String    @unique(map: "UQ_97672ac88f789774dd47f7c8be3")
+  password         String
+  resetToken       String?
+  resetTokenExpiry DateTime? @db.Timestamp(6)
+  books            Book[]    
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  title       String
+  author      String
+  readingStatus ReadingStatus @default(TO_READ)
+  isFavorite  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      Int
+  user        users    @relation(fields: [userId], references: [id])
+}
+
+enum ReadingStatus {
+  TO_READ
+  READING
+  READ
 }

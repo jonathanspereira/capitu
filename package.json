@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "npm run build && node dist/server.js",
     "dev": "ts-node-dev 'src/server.ts'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "repository": {
     "type": "git",
@@ -30,9 +31,12 @@
     "vitest": "^4.0.1"
   },
   "dependencies": {
+    "@wesleytodd/openapi": "^1.1.0",
     "body-parser": "^2.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "module-alias": "^2.2.3"
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "swagger-ui-express": "^5.0.1"
   }
 }
