@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "target": "ES2020",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["vitest/globals", "node"]
   }
 }
