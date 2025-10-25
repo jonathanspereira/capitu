@@ -1,7 +1,7 @@
 import { test, expect, vi } from 'vitest';
 import { getProfile } from '../../services/user.service';
 import { UserDto } from '../../view/dto/users.dto';
-import prisma from '../../libs/__mocks__/prisma.lib';
+import prismaMock from '../../libs/__mocks__/prisma.lib';
 
 vi.mock('../../libs/prisma.lib');
 
@@ -15,24 +15,24 @@ test('deve retornar o perfil do usuário quando existir', async () => {
     resetTokenExpiry: new Date(),
   };
 
-  prisma.users.findUnique.mockResolvedValue(mockUser);
+  prismaMock.users.findUnique.mockResolvedValue(mockUser);
 
   const result = await getProfile(1);
 
   expect(result).toEqual(UserDto.fromEntity(mockUser));
-  expect(prisma.users.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+  expect(prismaMock.users.findUnique).toHaveBeenCalledWith({ where: { id: 1} });
 });
 
 test('deve lançar um erro quando o usuário não for encontrado', async () => {
-  prisma.users.findUnique.mockResolvedValue(null);
+  prismaMock.users.findUnique.mockResolvedValue(null);
 
   await expect(getProfile(999)).rejects.toThrow('Usuário não encontrado.');
-  expect(prisma.users.findUnique).toHaveBeenCalledWith({ where: { id: 999 } });
+  expect(prismaMock.users.findUnique).toHaveBeenCalledWith({ where: { id: 999 } });
 });
 
 test('deve lançar um erro quando ocorrer um problema no banco de dados', async () => {
-  prisma.users.findUnique.mockRejectedValue(new Error('Database error'));
+  prismaMock.users.findUnique.mockRejectedValue(new Error('Database error'));
 
   await expect(getProfile(1)).rejects.toThrow('Database error');
-  expect(prisma.users.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+  expect(prismaMock.users.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
 });
