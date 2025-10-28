@@ -12,3 +12,5 @@ export const getProfile = async (userId: number): Promise<UserDto> => {
 
     return UserDto.fromEntity(user);
 };
+
+export default { getProfile };
