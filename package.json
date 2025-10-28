@@ -8,7 +8,8 @@
     "start": "npm run build && node dist/server.js",
     "dev": "ts-node-dev 'src/server.ts'",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "sonar": "node -r dotenv/config -e \"import('child_process').then(c => c.execSync('sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.token=' + process.env.SONAR_TOKEN, {stdio: 'inherit'}))\""
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,10 @@
     "@types/module-alias": "^2.0.4",
     "@types/node": "^24.9.1",
     "@vitest/coverage-v8": "^4.0.2",
+    "dotenv": "^17.2.3",
     "prisma": "^6.18.0",
+    "sonar-scanner": "^3.1.0",
+    "sonarqube-scanner": "^4.3.2",
     "supertest": "^7.1.4",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
@@ -37,7 +41,6 @@
     "@prisma/client": "^6.18.0",
     "@wesleytodd/openapi": "^1.1.0",
     "body-parser": "^2.2.0",
-    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
