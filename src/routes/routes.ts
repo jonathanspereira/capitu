@@ -1,13 +1,10 @@
-import { Router } from 'express';
+import { Router } from "express";
+import authRoutes from "./auth.routes";
+import userRoutes from "./user.routes";
 
+const routes = Router();
 
-class Routes {
-    static define(router: Router): Router {
+routes.use("/auth", authRoutes);
+routes.use("/user", userRoutes);
 
-    
-
-        return router;
-    }
-}
-
-export default Routes.define(Router());
+export default routes;

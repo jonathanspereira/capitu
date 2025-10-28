@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
 import UserService from '../services/user.service';
 import { BadRequestError } from '../helpers/api-errors';
+import { UserDto } from '../view/dto/users.dto';
 
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: number;
-  }
+export interface AuthenticatedRequest extends Request {
+  user: UserDto;
 }
 
 export class UserController {
 
-    async getProfile(req: Request, res: Response) {
+    async getProfile(req: AuthenticatedRequest, res: Response) {
     try {
 
-      const { id } = (req as AuthenticatedRequest).user;
+      const { id } = req.user;
 
       const userProfileDto = await UserService.getProfile(id);
 
@@ -26,5 +25,5 @@ export class UserController {
 
       return res.status(500).json({ message: 'Erro interno do servidor.' });
     }
-  }
+  } 
 }

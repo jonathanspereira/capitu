@@ -1,6 +1,5 @@
 import { users } from '@prisma/client';
 
-
 export class UserDto {
     id: number;
     name: string;
