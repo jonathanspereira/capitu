@@ -18,3 +18,5 @@ export const sendPasswordResetEmail = async (
     throw new Error("Não foi possível enviar o e-mail de reset de senha.");
   }
 };
+
+export default { sendPasswordResetEmail };

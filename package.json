@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/jonathanspereira/capitu#readme",
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^24.9.1",
     "@vitest/coverage-v8": "^4.0.2",
@@ -40,6 +41,7 @@
   "dependencies": {
     "@prisma/client": "^6.18.0",
     "@wesleytodd/openapi": "^1.1.0",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
