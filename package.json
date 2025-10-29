@@ -4,10 +4,10 @@
   "description": "Capitu application API backend repository.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.json",
     "start": "npm run build && node dist/server.js",
     "dev": "ts-node-dev 'src/server.ts'",
-    "test": "vitest",
+    "test": "vitest --config tsconfig.test.json",
     "coverage": "vitest run --coverage",
     "sonar": "node -r dotenv/config -e \"import('child_process').then(c => c.execSync('sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.token=' + process.env.SONAR_TOKEN, {stdio: 'inherit'}))\""
   },
@@ -27,6 +27,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^24.9.1",
     "@types/swagger-ui-express": "^4.1.8",

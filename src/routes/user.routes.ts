@@ -1,11 +1,14 @@
-import { Router } from "express";
-import { UserController } from "../controllers/user.controller";  
+import { Request, Response, Router } from "express";
 import { authMiddleware } from "../middlewares/isAuthenticated";
+import UserController from "../controllers/user.controller";
 
 const userRoutes = Router();
+const userController = new UserController();
 
-userRoutes.use(authMiddleware);
+userRoutes.get("/profile", authMiddleware, (req: Request, res: Response) => {
+  if (!req.user) return res.status(401).json({ error: "Não autorizado" });
 
-userRoutes.get('/profile', new UserController().getProfile);
+  userController.getProfile(req, res);
+});
 
 export default userRoutes;

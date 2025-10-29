@@ -3,14 +3,17 @@ import UserService from '../services/user.service';
 import { BadRequestError } from '../helpers/api-errors';
 import { UserDto } from '../view/dto/users.dto';
 
-export interface AuthenticatedRequest extends Request {
-  user: UserDto;
+export interface OptionalAuthenticatedRequest extends Request {
+  user?: UserDto;
 }
 
-export class UserController {
+export default class UserController {
 
-    async getProfile(req: AuthenticatedRequest, res: Response) {
+  async getProfile(req: OptionalAuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Não autorizado' });
+      }
 
       const { id } = req.user;
 

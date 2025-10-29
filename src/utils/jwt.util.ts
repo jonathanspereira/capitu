@@ -1,6 +1,6 @@
-import * as jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET: string = process.env.JWT_SECRET!;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET não configurado no .env");
 }
@@ -10,14 +10,21 @@ export interface JwtPayload {
 }
 
 class JwtUtil {
-  static sign(payload: JwtPayload, expiresIn: string = '1h'): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  static sign(payload: JwtPayload, expiresIn: `${number}${'s' | 'm' | 'h' | 'd'}` = '1h'): string {
+    const options: SignOptions = { expiresIn };
+    return jwt.sign(payload, JWT_SECRET, options);
   }
 
   static verify(token: string): JwtPayload {
     try {
-      return jwt.verify(token, JWT_SECRET) as JwtPayload;
-    } catch (error) {
+      const decoded = jwt.verify(token, JWT_SECRET);
+
+      if (typeof decoded !== 'object' || decoded === null || !('id' in decoded)) {
+        throw new Error("Token inválido");
+      }
+
+      return decoded as JwtPayload;
+    } catch {
       throw new Error("Token inválido ou expirado");
     }
   }

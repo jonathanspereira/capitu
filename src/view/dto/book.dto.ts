@@ -1,14 +1,14 @@
 import { Book, ReadingStatus } from '@prisma/client';
 
 export class BookDto {
-  id: number;
-  title: string;
-  author: string;
-  readingStatus: ReadingStatus;
-  isFavorite: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: number;
+  id!: number;
+  title!: string;
+  author!: string;
+  readingStatus!: ReadingStatus;
+  isFavorite!: boolean;
+  createdAt!: Date;
+  updatedAt!: Date;
+  userId!: number;
 
   public static fromEntity(book: Book): BookDto {
     const dto = new BookDto();

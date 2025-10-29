@@ -1,11 +1,11 @@
-import { users } from '@prisma/client';
+import { Users } from '@prisma/client';
 
 export class UserDto {
-    id: number;
-    name: string;
-    email: string;
+    id!: number;
+    name!: string;
+    email!: string;
 
-  public static fromEntity(user: users): UserDto {
+  public static fromEntity(user: Users): UserDto {
     const dto = new UserDto();
     dto.id = user.id;
     dto.name = user.name;

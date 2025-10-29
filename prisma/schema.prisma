@@ -7,7 +7,7 @@ datasource db {
   url      = env("DIRECT_URL")
 }
 
-model users {
+model Users {
   id               Int       @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @default(autoincrement())
   name             String
   email            String    @unique(map: "UQ_97672ac88f789774dd47f7c8be3")
@@ -27,7 +27,7 @@ model Book {
   updatedAt   DateTime @updatedAt
 
   userId      Int
-  user        users    @relation(fields: [userId], references: [id])
+  user        Users    @relation(fields: [userId], references: [id])
 }
 
 enum ReadingStatus {
