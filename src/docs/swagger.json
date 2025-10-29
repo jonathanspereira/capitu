@@ -2,26 +2,16 @@
   "openapi": "3.0.0",
   "info": {
     "title": "API - Capitu",
-    "version": "1.0.0",
-    "description": "Documentação da API do Aplicativo Capitu"
+    "version": "1.3.0",
+    "description": "Documentação da API do Aplicativo Capitu com Auth, Users e Books"
   },
   "servers": [
-    {
-      "url": "http://localhost:3000",
-      "description": "Servidor de Desenvolvimento"
-    },
-    {
-      "url": "https://capitu.onrender.com",
-      "description": "Servidor de Produção"
-    }
+    { "url": "http://localhost:3000", "description": "Servidor de Desenvolvimento" },
+    { "url": "https://capitu.onrender.com", "description": "Servidor de Produção" }
   ],
   "components": {
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
     },
     "schemas": {
       "User": {
@@ -32,227 +22,258 @@
           "email": { "type": "string", "example": "joao@email.com" }
         }
       },
-      "ErrorResponse": {
+      "BookResponse": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string",
-            "example": "Descrição detalhada do erro."
-          }
+          "id": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "example": "1984" },
+          "author": { "type": "string", "example": "George Orwell" },
+          "readingStatus": { "type": "string", "enum": ["TO_READ","READING","READ"], "example": "TO_READ" },
+          "isFavorite": { "type": "boolean", "example": false },
+          "createdAt": { "type": "string", "format": "date-time", "example": "2025-10-28T20:00:00Z" },
+          "updatedAt": { "type": "string", "format": "date-time", "example": "2025-10-28T20:00:00Z" },
+          "userId": { "type": "integer", "example": 1 }
         }
+      },
+      "ExternalBook": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "example": "The Lord of the Rings" },
+          "author": { "type": "string", "example": "J.R.R. Tolkien" },
+          "coverUrl": { "type": "string", "example": "https://covers.openlibrary.org/b/id/258027-L.jpg" },
+          "openLibraryWorkKey": { "type": "string", "example": "/works/OL27448W" }
+        }
+      },
+      "CreateBookRequest": {
+        "type": "object",
+        "required": ["userId","title","author"],
+        "properties": {
+          "userId": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "example": "1984" },
+          "author": { "type": "string", "example": "George Orwell" }
+        }
+      },
+      "UpdateStatusRequest": {
+        "type": "object",
+        "required": ["bookId","userId","status"],
+        "properties": {
+          "bookId": { "type": "integer", "example": 1 },
+          "userId": { "type": "integer", "example": 1 },
+          "status": { "type": "string", "enum": ["TO_READ","READING","READ"], "example": "READING" }
+        }
+      },
+      "ToggleFavoriteRequest": {
+        "type": "object",
+        "required": ["bookId","userId"],
+        "properties": {
+          "bookId": { "type": "integer", "example": 1 },
+          "userId": { "type": "integer", "example": 1 }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "required": ["name","email","password"],
+        "properties": {
+          "name": { "type": "string", "example": "João Silva" },
+          "email": { "type": "string", "example": "joao@email.com" },
+          "password": { "type": "string", "example": "123456" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email","password"],
+        "properties": {
+          "email": { "type": "string", "example": "usuario@email.com" },
+          "password": { "type": "string", "example": "123456" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": { "$ref": "#/components/schemas/User" },
+          "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": { "type": "string", "example": "usuario@email.com" }
+        }
+      },
+      "VerifyResetTokenRequest": {
+        "type": "object",
+        "required": ["email","token"],
+        "properties": {
+          "email": { "type": "string", "example": "usuario@email.com" },
+          "token": { "type": "string", "example": "123456" }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": ["email","token","newPassword"],
+        "properties": {
+          "email": { "type": "string", "example": "usuario@email.com" },
+          "token": { "type": "string", "example": "123456" },
+          "newPassword": { "type": "string", "example": "NovaSenha123" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": { "message": { "type": "string", "example": "Descrição detalhada do erro." } }
       }
     }
   },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
+  "security": [{ "bearerAuth": [] }],
   "paths": {
     "/v1/api/register": {
       "post": {
         "tags": ["Autenticação"],
         "summary": "Registra um novo usuário",
         "security": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["name", "email", "password"],
-                "properties": {
-                  "name": { "type": "string", "example": "João Silva" },
-                  "email": { "type": "string", "example": "joao@email.com" },
-                  "password": { "type": "string", "example": "123456" }
-                }
-              }
-            }
-          }
-        },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateUserRequest" } } } },
         "responses": {
-          "201": {
-            "description": "Usuário registrado com sucesso",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
-          },
-          "400": {
-            "description": "Email já cadastrado ou dados inválidos",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
-          }
+          "201": { "description": "Usuário registrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "400": { "description": "Email já cadastrado ou dados inválidos", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/v1/api/login": {
       "post": {
         "tags": ["Autenticação"],
-        "summary": "Realiza login de um usuário",
+        "summary": "Login do usuário",
         "security": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["email", "password"],
-                "properties": {
-                  "email": { "type": "string", "example": "usuario@email.com" },
-                  "password": { "type": "string", "example": "123456" }
-                }
-              }
-            }
-          }
-        },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } } },
         "responses": {
-          "200": {
-            "description": "Login realizado com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "user": { "$ref": "#/components/schemas/User" },
-                    "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Email ou senha inválidos / campos ausentes",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
-          }
+          "200": { "description": "Login realizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } } },
+          "400": { "description": "Email ou senha inválidos / campos ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/v1/api/forgot-password": {
       "post": {
         "tags": ["Autenticação"],
-        "summary": "1. Solicita o envio do código OTP para reset de senha",
-        "description": "Envia um código de 6 dígitos (OTP) por e-mail, se o usuário existir.",
-        "security": [], 
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["email"],
-                "properties": { "email": { "type": "string", "example": "usuario@email.com" } }
-              }
-            }
-          }
-        },
+        "summary": "Solicita redefinição de senha",
+        "security": [],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" } } } },
         "responses": {
-          "200": {
-            "description": "Resposta genérica de sucesso para não revelar se um e-mail está cadastrado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": { "message": { "type": "string", "example": "Se o e-mail existir, você receberá instruções." } }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "E-mail não fornecido",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
-          }
+          "200": { "description": "Instruções enviadas se o e-mail existir", "content": { "application/json": { "example": { "message": "Se o e-mail existir, você receberá instruções para resetar a senha." } } } },
+          "404": { "description": "Usuário não encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/v1/api/verify-reset-token": {
       "post": {
         "tags": ["Autenticação"],
-        "summary": "2. Verifica se o código OTP para reset de senha é válido",
-        "description": "Recebe um código OTP e verifica sua validade e tempo de expiração sem alterar a senha.",
+        "summary": "Verifica o código de redefinição de senha",
         "security": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["token"],
-                "properties": {
-                  "token": {
-                    "type": "string",
-                    "example": "123456",
-                    "description": "O código de 6 dígitos (OTP) recebido por e-mail."
-                  }
-                }
-              }
-            }
-          }
-        },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerifyResetTokenRequest" } } } },
         "responses": {
-          "200": {
-            "description": "O código é válido e pode ser usado para resetar a senha.",
-            "content": {
-              "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string", "example": "Código válido" } } } }
-            }
-          },
-          "400": {
-            "description": "Código inválido, expirado ou não fornecido.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
-          }
+          "200": { "description": "Token válido", "content": { "application/json": { "example": { "message": "Código válido" } } } },
+          "400": { "description": "Token inválido ou expirado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/v1/api/reset-password": {
       "post": {
         "tags": ["Autenticação"],
-        "summary": "3. Redefine a senha do usuário usando um código OTP válido",
-        "description": "Valida novamente o código OTP e define a nova senha para o usuário. O código só pode ser usado uma vez.",
+        "summary": "Redefine a senha do usuário",
         "security": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["token", "newPassword"],
-                "properties": {
-                  "token": { "type": "string", "example": "123456", "description": "O código de 6 dígitos validado na etapa anterior." },
-                  "newPassword": { "type": "string", "example": "NovaSenhaSegura123" }
-                }
-              }
-            }
-          }
-        },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" } } } },
         "responses": {
-          "200": {
-            "description": "Senha resetada com sucesso",
-            "content": {
-              "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string", "example": "Senha redefinida com sucesso" } } } }
-            }
-          },
-          "400": {
-            "description": "Código inválido/expirado ou campos ausentes",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
-          }
+          "200": { "description": "Senha redefinida com sucesso", "content": { "application/json": { "example": { "message": "Senha redefinida com sucesso" } } } },
+          "400": { "description": "Token inválido ou expirado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     },
     "/v1/api/profile": {
       "get": {
         "tags": ["Usuários"],
-        "summary": "Retorna o perfil do usuário autenticado",
+        "summary": "Retorna perfil do usuário autenticado",
         "security": [{ "bearerAuth": [] }],
         "responses": {
-          "200": {
-            "description": "Perfil retornado com sucesso",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
-          },
-          "401": {
-            "description": "Token ausente ou inválido"
-          }
+          "200": { "description": "Perfil retornado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "401": { "description": "Token ausente ou inválido", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/v1/api/books/search": {
+      "get": {
+        "tags": ["Livros"],
+        "summary": "Busca livros na Open Library",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de livros", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ExternalBook" } } } } },
+          "400": { "description": "Parâmetro q ausente", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/v1/api/books": {
+      "post": {
+        "tags": ["Livros"],
+        "summary": "Adiciona livro à biblioteca do usuário",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateBookRequest" } } } },
+        "responses": {
+          "201": { "description": "Livro adicionado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookResponse" } } } },
+          "400": { "description": "Campos obrigatórios ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/v1/api/books/status": {
+      "patch": {
+        "tags": ["Livros"],
+        "summary": "Atualiza status de leitura",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateStatusRequest" } } } },
+        "responses": {
+          "200": { "description": "Status atualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookResponse" } } } },
+          "400": { "description": "Campos obrigatórios ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Livro não encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/v1/api/books/favorite": {
+      "patch": {
+        "tags": ["Livros"],
+        "summary": "Marca/desmarca livro como favorito",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ToggleFavoriteRequest" } } } },
+        "responses": {
+          "200": { "description": "Favorito atualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookResponse" } } } },
+          "400": { "description": "Campos obrigatórios ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/v1/api/books/user/{userId}": {
+      "get": {
+        "tags": ["Livros"],
+        "summary": "Lista livros de um usuário",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "userId", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Lista de livros", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BookResponse" } } } } },
+          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
         }
       }
     }
   },
   "tags": [
-    { "name": "Autenticação", "description": "Endpoints relacionados ao registro, login e recuperação de senha" },
-    { "name": "Usuários", "description": "Gerenciamento de usuários" }
+    { "name": "Autenticação", "description": "Endpoints de registro, login e recuperação de senha" },
+    { "name": "Usuários", "description": "Gerenciamento de usuários" },
+    { "name": "Livros", "description": "Biblioteca do usuário e busca na Open Library" }
   ]
 }
