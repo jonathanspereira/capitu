@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "API - Capitu",
-    "version": "1.3.0",
-    "description": "Documentação da API do Aplicativo Capitu com Auth, Users e Books"
+    "version": "1.4.0",
+    "description": "Documentação da API do Aplicativo Capitu com Auth, Users, Books e Recomendações"
   },
   "servers": [
     { "url": "http://localhost:3000", "description": "Servidor de Desenvolvimento" },
@@ -42,6 +42,24 @@
           "author": { "type": "string", "example": "J.R.R. Tolkien" },
           "coverUrl": { "type": "string", "example": "https://covers.openlibrary.org/b/id/258027-L.jpg" },
           "openLibraryWorkKey": { "type": "string", "example": "/works/OL27448W" }
+        }
+      },
+      "BookSuggestion": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "example": "O Hobbit" },
+          "author": { "type": "string", "example": "J.R.R. Tolkien" },
+          "coverUrl": { "type": "string", "example": "https://covers.openlibrary.org/b/id/823456-L.jpg" },
+          "openLibraryData": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string", "example": "The Hobbit" },
+              "author_name": { "type": "array", "items": { "type": "string" }, "example": ["J.R.R. Tolkien"] },
+              "first_publish_year": { "type": "integer", "example": 1937 },
+              "cover_i": { "type": "integer", "example": 823456 },
+              "key": { "type": "string", "example": "/works/OL27447W" }
+            }
+          }
         }
       },
       "CreateBookRequest": {
@@ -126,147 +144,42 @@
   },
   "security": [{ "bearerAuth": [] }],
   "paths": {
-    "/v1/api/register": {
-      "post": {
-        "tags": ["Autenticação"],
-        "summary": "Registra um novo usuário",
-        "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateUserRequest" } } } },
-        "responses": {
-          "201": { "description": "Usuário registrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
-          "400": { "description": "Email já cadastrado ou dados inválidos", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/login": {
-      "post": {
-        "tags": ["Autenticação"],
-        "summary": "Login do usuário",
-        "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } } },
-        "responses": {
-          "200": { "description": "Login realizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } } },
-          "400": { "description": "Email ou senha inválidos / campos ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/forgot-password": {
-      "post": {
-        "tags": ["Autenticação"],
-        "summary": "Solicita redefinição de senha",
-        "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" } } } },
-        "responses": {
-          "200": { "description": "Instruções enviadas se o e-mail existir", "content": { "application/json": { "example": { "message": "Se o e-mail existir, você receberá instruções para resetar a senha." } } } },
-          "404": { "description": "Usuário não encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/verify-reset-token": {
-      "post": {
-        "tags": ["Autenticação"],
-        "summary": "Verifica o código de redefinição de senha",
-        "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerifyResetTokenRequest" } } } },
-        "responses": {
-          "200": { "description": "Token válido", "content": { "application/json": { "example": { "message": "Código válido" } } } },
-          "400": { "description": "Token inválido ou expirado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/reset-password": {
-      "post": {
-        "tags": ["Autenticação"],
-        "summary": "Redefine a senha do usuário",
-        "security": [],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" } } } },
-        "responses": {
-          "200": { "description": "Senha redefinida com sucesso", "content": { "application/json": { "example": { "message": "Senha redefinida com sucesso" } } } },
-          "400": { "description": "Token inválido ou expirado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/profile": {
+    "/v1/api/register": { "post": { "$ref": "#/paths/register" } },
+    "/v1/api/login": { "post": { "$ref": "#/paths/login" } },
+    "/v1/api/forgot-password": { "post": { "$ref": "#/paths/forgot-password" } },
+    "/v1/api/verify-reset-token": { "post": { "$ref": "#/paths/verify-reset-token" } },
+    "/v1/api/reset-password": { "post": { "$ref": "#/paths/reset-password" } },
+    "/v1/api/profile": { "get": { "$ref": "#/paths/profile" } },
+    "/v1/api/books/search": { "get": { "$ref": "#/paths/books-search" } },
+    "/v1/api/books": { "post": { "$ref": "#/paths/books" } },
+    "/v1/api/books/status": { "patch": { "$ref": "#/paths/books-status" } },
+    "/v1/api/books/favorite": { "patch": { "$ref": "#/paths/books-favorite" } },
+    "/v1/api/books/user/{userId}": { "get": { "$ref": "#/paths/books-user" } },
+    "/v1/api/recommendations/user/{userId}": {
       "get": {
-        "tags": ["Usuários"],
-        "summary": "Retorna perfil do usuário autenticado",
+        "tags": ["Recomendações"],
+        "summary": "Gera recomendações de livros para o usuário",
         "security": [{ "bearerAuth": [] }],
-        "responses": {
-          "200": { "description": "Perfil retornado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
-          "401": { "description": "Token ausente ou inválido", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/books/search": {
-      "get": {
-        "tags": ["Livros"],
-        "summary": "Busca livros na Open Library",
         "parameters": [
-          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" } },
-          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 10 } }
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "integer" } }
         ],
         "responses": {
-          "200": { "description": "Lista de livros", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ExternalBook" } } } } },
-          "400": { "description": "Parâmetro q ausente", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/books": {
-      "post": {
-        "tags": ["Livros"],
-        "summary": "Adiciona livro à biblioteca do usuário",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateBookRequest" } } } },
-        "responses": {
-          "201": { "description": "Livro adicionado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookResponse" } } } },
-          "400": { "description": "Campos obrigatórios ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/books/status": {
-      "patch": {
-        "tags": ["Livros"],
-        "summary": "Atualiza status de leitura",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateStatusRequest" } } } },
-        "responses": {
-          "200": { "description": "Status atualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookResponse" } } } },
-          "400": { "description": "Campos obrigatórios ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "404": { "description": "Livro não encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/books/favorite": {
-      "patch": {
-        "tags": ["Livros"],
-        "summary": "Marca/desmarca livro como favorito",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ToggleFavoriteRequest" } } } },
-        "responses": {
-          "200": { "description": "Favorito atualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookResponse" } } } },
-          "400": { "description": "Campos obrigatórios ausentes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
-        }
-      }
-    },
-    "/v1/api/books/user/{userId}": {
-      "get": {
-        "tags": ["Livros"],
-        "summary": "Lista livros de um usuário",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "userId", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": {
-          "200": { "description": "Lista de livros", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BookResponse" } } } } },
-          "500": { "description": "Erro interno do servidor", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+          "200": {
+            "description": "Lista de livros recomendados",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BookSuggestion" } }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro userId inválido",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "500": {
+            "description": "Erro interno ao gerar recomendações",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
         }
       }
     }
@@ -274,6 +187,7 @@
   "tags": [
     { "name": "Autenticação", "description": "Endpoints de registro, login e recuperação de senha" },
     { "name": "Usuários", "description": "Gerenciamento de usuários" },
-    { "name": "Livros", "description": "Biblioteca do usuário e busca na Open Library" }
+    { "name": "Livros", "description": "Biblioteca do usuário e busca na Open Library" },
+    { "name": "Recomendações", "description": "Endpoints de geração de recomendações de livros para usuários" }
   ]
 }

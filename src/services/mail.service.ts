@@ -1,4 +1,4 @@
-import EmailGateway from '../gateway/resend.gateway';
+import EmailGateway from '../gateways/resend.gateway';
 import { getPasswordResetEmail } from '../view/templates/passwordReset.template';
 import { isValidEmail, isValidResetToken } from '../libs/validators.lib';
 
