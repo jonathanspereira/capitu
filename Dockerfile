@@ -1,24 +1,17 @@
-# --------------------------
 # Etapa 1: Build da aplicação
-# --------------------------
 FROM node:22-bookworm-slim AS build
-
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 
-RUN npx prisma generate
-RUN npm run build -- --project tsconfig.json
+RUN npm run build
 
-# --------------------------
-# Etapa 2: Imagem de produção
-# --------------------------
-FROM node:22-bookworm-slim AS production
+# Etapa 2: Imagem final para produção
+FROM node:22-bookworm-slim
 
 WORKDIR /app
 
@@ -32,4 +25,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD npx prisma generate --schema=prisma/schema.prisma && node dist/index.js
