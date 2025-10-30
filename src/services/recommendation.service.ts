@@ -17,29 +17,39 @@ export class RecommendationService {
   ) {}
 
   public async generateRecommendations(userId: number): Promise<BookSuggestion[]> {
-    // 1️⃣ Pega livros do usuário
+
     const userBooks = await this.bookService.listUserBooks(userId);
     if (userBooks.length === 0) return [];
 
-    // 2️⃣ Monta prompt para Groq
     const prompt = `
-Sugira 5 livros semelhantes aos seguintes, considerando gênero, estilo e público-alvo:
-${userBooks.map((b, i) => `${i + 1}. ${b.title}, ${b.author}`).join("\n")}
-Retorne apenas JSON no seguinte formato:
-[
-  { "title": "...", "author": "..." }
-]
-`;
+      Sugira 5 livros semelhantes aos seguintes, considerando gênero, estilo e público-alvo:
+      ${userBooks.map((b, i) => `${i + 1}. ${b.title}, ${b.author}`).join("\n")}
+      Retorne apenas JSON no seguinte formato:
+      [
+        { "title": "...", "author": "..." }
+      ]
+      `;
 
-    // 3️⃣ Chama Groq AI
     const groqResponse = await this.groqGateway.gerarSugestoes(prompt);
 
-    const jsonMatch = groqResponse.match(/\[.*\]/s);
-    if (!jsonMatch) return [];
+    const startIdx = groqResponse.indexOf("[");
+    const endIdx = groqResponse.lastIndexOf("]") + 1;
 
-    const suggestions: { title: string; author: string }[] = JSON.parse(jsonMatch[0]);
+    if (startIdx === -1 || endIdx === 0 || startIdx >= endIdx) {
+      return [];
+    }
 
-    // 4️⃣ Buscar dados da OpenLibrary em paralelo
+    const jsonText = groqResponse.slice(startIdx, endIdx);
+
+    let suggestions: { title: string; author: string }[] = [];
+
+    try {
+      suggestions = JSON.parse(jsonText);
+    } catch (err) {
+      console.error("Erro ao parsear JSON do Groq:", err);
+      return [];
+    }
+
     const enrichedSuggestions = await Promise.allSettled(
       suggestions.map(async (sugg) => {
         try {
@@ -59,7 +69,6 @@ Retorne apenas JSON no seguinte formato:
       })
     );
 
-    // Filtra apenas resultados bem-sucedidos
     return enrichedSuggestions
       .filter((r) => r.status === "fulfilled")
       .map((r: PromiseFulfilledResult<BookSuggestion>) => r.value);
