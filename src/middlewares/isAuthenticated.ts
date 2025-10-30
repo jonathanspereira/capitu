@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../libs/prisma.lib";
-import JwtUtil, { JwtPayload } from "../utils/jwt.util";
+import JwtUtil from "../utils/jwt.util";
 import { UnauthorizedError } from "../helpers/api-errors";
 import { UserDto } from "../view/dto/users.dto";
 
