@@ -8,6 +8,7 @@
     "start": "npm run build && node dist/server.js",
     "dev": "ts-node-dev 'src/server.ts'",
     "test": "vitest --config tsconfig.test.json",
+    "postinstall": "prisma generate",
     "coverage": "vitest run --coverage",
     "sonar": "node -r dotenv/config -e \"import('child_process').then(c => c.execSync('sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.token=' + process.env.SONAR_TOKEN, {stdio: 'inherit'}))\""
   },

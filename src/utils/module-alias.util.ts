@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import moduleAlias from 'module-alias';
 
 const files = path.resolve(__dirname, '../..');

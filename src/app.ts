@@ -2,7 +2,7 @@ import './utils/module-alias.util';
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { Server } from 'http';
+import { Server } from 'node:http';
 import router from './routes/routes';
 import { BadRequestError, UnauthorizedError } from './helpers/api-errors';
 import { setupSwagger } from './config/swagger.config';

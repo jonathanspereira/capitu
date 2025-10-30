@@ -4,7 +4,7 @@ import { ReadingStatus } from "@prisma/client";
 import { OpenLibraryGateway, OpenLibraryBook } from "../gateways/openlibrary.gateway";
 
 export class BookService {
-  private openLibraryGateway = new OpenLibraryGateway();
+  private readonly openLibraryGateway = new OpenLibraryGateway();
 
   // Busca livros na OpenLibrary
   public async searchBooks(query: string, limit = 10): Promise<Array<OpenLibraryBook & { coverUrl?: string }>> {

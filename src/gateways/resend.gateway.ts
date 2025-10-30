@@ -2,8 +2,8 @@ import { Resend } from 'resend';
 import 'dotenv/config';
 
 class EmailGateway {
-  private resend: Resend;
-  private emailFrom: string;
+  private readonly resend: Resend;
+  private readonly emailFrom: string;
 
   constructor() {
     const apiKey = process.env.RESEND_API_KEY;
