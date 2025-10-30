@@ -10,7 +10,7 @@ import { setupSwagger } from './config/swagger.config';
 export class SetupApplication {
   private server?: Server;
 
-  constructor(private port = 3000, public app = express()) {}
+  constructor(private readonly port = 3000, public app = express()) {}
 
   public init(): void {
     this.setupExpress();

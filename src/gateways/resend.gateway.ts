@@ -23,7 +23,7 @@ class EmailGateway {
 
   public async sendEmail(to: string, subject: string, html: string): Promise<void> {
     try {
-      const { data, error } = await this.resend.emails.send({
+      const { error } = await this.resend.emails.send({
         from: this.emailFrom,
         to: [to],
         subject: subject,
