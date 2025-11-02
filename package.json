@@ -4,7 +4,7 @@
   "description": "Capitu application API backend repository.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && cp -r src/docs dist/",
     "start": "npm run build && node dist/server.js",
     "dev": "ts-node-dev 'src/server.ts'",
     "test": "vitest --config tsconfig.test.json",
