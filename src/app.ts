@@ -42,7 +42,7 @@ export class SetupApplication {
   }
 
   private setupRoutes(): void {
-    this.app.use('/api', router);
+    this.app.use('/v1/api', router);
   }
 
   private setupErrorHandling(): void {
@@ -60,7 +60,7 @@ export class SetupApplication {
   public start(): void {
     this.server = this.app.listen(this.port, () => {
       console.log(`🚀 Server running on port ${this.port}`);
-      console.log(`📘 Swagger Docs available at http://localhost:${this.port}/api-docs`);
+      console.log(`📘 Swagger Docs available at http://localhost:${this.port}/docs`);
     });
   }
 }

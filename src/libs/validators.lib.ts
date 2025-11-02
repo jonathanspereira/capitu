@@ -12,3 +12,9 @@ export const isValidResetToken = (token: string): boolean => {
   const tokenRegex = /^[A-Za-z0-9-_]{20,}$/;
   return tokenRegex.test(token);
 };
+
+export const isValidOtpCode = (otp: string): boolean => {
+  const otpRegex = /^[0-9]{4,8}$/;
+  return otpRegex.test(otp);
+};
+

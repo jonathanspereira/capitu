@@ -7,27 +7,39 @@ export class BookService {
   private readonly openLibraryGateway = new OpenLibraryGateway();
 
   // Busca livros na OpenLibrary
-  public async searchBooks(query: string, limit = 10): Promise<Array<OpenLibraryBook & { coverUrl?: string }>> {
-    const results: Array<OpenLibraryBook & { coverUrl?: string }> = [];
-
+  public async searchBooks(
+    query: string,
+    limit = 10
+  ): Promise<Array<OpenLibraryBook & { coverUrl?: string }>> {
     try {
-      for (let i = 0; i < limit; i++) {
-        // Chamadas em série; depois podemos paralelizar com Promise.all
-        const book = await this.openLibraryGateway.searchBook(query);
-        if (book) {
-          results.push({
-            ...book,
-            coverUrl: book.cover_i ? this.openLibraryGateway.getCoverUrl(book.cover_i, "L") : undefined
-          });
-        }
-      }
+      // Cria um array de promessas para buscas em paralelo
+      const promises = Array.from({ length: limit }).map(() =>
+        this.openLibraryGateway.searchBook(query)
+      );
+
+      // Aguarda todas as requisições terminarem
+      const results = await Promise.all(promises);
+
+      // Filtra resultados válidos e apenas em português
+      const books = results
+        .filter(
+          (book): book is OpenLibraryBook =>
+            book !== null && !!book.language?.includes("por")
+        )
+        .map((book) => ({
+          ...book,
+          coverUrl: book.cover_i
+            ? this.openLibraryGateway.getCoverUrl(book.cover_i, "L")
+            : undefined,
+        }));
+
+      return books;
     } catch (err) {
       console.error("Erro ao buscar livros na OpenLibrary:", err);
+      return [];
     }
-
-    return results;
   }
-
+  
   // Adiciona livro à lista do usuário
   public async addBookToUser(
     userId: number,
