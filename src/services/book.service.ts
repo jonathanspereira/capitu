@@ -60,7 +60,7 @@ export class BookService {
         title: bookData.title,
         author: bookData.author,
         userId,
-        readingStatus: "TO_READ",
+        readingStatus: "READING",
       },
     });
 
