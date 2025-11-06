@@ -104,4 +104,23 @@ export class BookService {
 
     return books.map(BookDto.fromEntity);
   }
+
+  // Remove livro da lista do usuário
+  public async removeBookFromUser(bookId: number, userId: number): Promise<{ message: string }> {
+    const book = await prisma.book.findFirst({
+    where: { id: bookId, userId },
+  });
+
+  if (!book) {
+    throw new Error('Livro não encontrado ou não pertence ao usuário');
+  }
+
+  await prisma.book.delete({
+    where: { id: bookId },
+  });
+
+  return { message: 'Livro removido com sucesso!' };
+}
+
+
 }

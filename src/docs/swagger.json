@@ -229,6 +229,41 @@
         }
       }
     },
+    "/books/remove": {
+    "delete": {
+      "summary": "Remover livro da biblioteca do usuário",
+      "tags": ["Livros"],
+      "security": [{ "bearerAuth": [] }],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "bookId": { "type": "integer", "example": 10 },
+                "userId": { "type": "integer", "example": 1 }
+              },
+              "required": ["bookId", "userId"]
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Livro removido com sucesso",
+          "content": {
+            "application/json": {
+              "example": { "message": "Livro removido com sucesso!" }
+            }
+          }
+        },
+        "400": { "description": "Campos obrigatórios ausentes" },
+        "404": { "description": "Livro não encontrado ou não pertence ao usuário" },
+        "500": { "description": "Erro ao remover livro" }
+      }
+    }
+  },
     "/books/user/{userId}": {
       "get": {
         "summary": "Listar livros de um usuário",

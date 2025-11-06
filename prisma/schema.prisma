@@ -23,7 +23,7 @@ model Book {
   id          Int      @id @default(autoincrement())
   title       String
   author      String
-  readingStatus ReadingStatus @default(TO_READ)
+  readingStatus ReadingStatus @default(READING)
   isFavorite  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -33,7 +33,6 @@ model Book {
 }
 
 enum ReadingStatus {
-  TO_READ
   READING
   READ
 }

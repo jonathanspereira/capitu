@@ -85,12 +85,34 @@ export class BookController {
     // Lista livros do usuário
     async listUserBooks(req: Request, res: Response) {
         try {
-        const userId = Number(req.params.userId);
-        const books = await bookService.listUserBooks(userId);
-        return res.json(books);
+            const userId = Number(req.params.userId);
+            const books = await bookService.listUserBooks(userId);
+            return res.json(books);
         } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Erro ao listar livros" });
         }
+    }
+
+    //  Remove livro da lista do usuário
+    async removeBookFromUser(req: Request, res: Response) {
+        try {
+            const { bookId, userId } = req.body;
+
+            if (!bookId || !userId) {
+            return res.status(400).json({ error: "Campos obrigatórios ausentes" });
+            }
+
+            const result = await bookService.removeBookFromUser(Number(bookId), Number(userId));
+
+            return res.status(200).json(result);
+        } catch (error: any) {
+            console.error(error.message);
+            if (error.message.includes("Livro não encontrado ou não pertence ao usuário")) {
+            return res.status(404).json({ error: error.message });
+            }
+            return res.status(500).json({ error: "Erro ao remover livro" });
+        }
+
     }
 }
