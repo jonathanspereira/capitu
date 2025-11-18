@@ -27,13 +27,13 @@ export class BookController {
     // Adiciona livro à lista do usuário
     async addBook(req: Request, res: Response) {
         try {
-        const { userId, title, author } = req.body;
+        const { userId, title, author, thumbnail, readingStatus } = req.body;
 
-        if (!userId || !title || !author) {
+        if (!userId || !title || !author || !readingStatus) {
             return res.status(400).json({ error: "Campos obrigatórios ausentes" });
         }
 
-        const book = await bookService.addBookToUser(userId, { title, author });
+        const book = await bookService.addBookToUser(userId, { title, author, thumbnail, readingStatus });
         return res.status(201).json(book);
         } catch (error) {
         console.error(error);

@@ -60,7 +60,7 @@ export class RecommendationService {
             openLibraryData: olData || undefined,
             coverUrl: olData?.cover_i
               ? this.openLibraryGateway.getCoverUrl(olData.cover_i, "L")
-              : undefined,
+    : undefined,
           };
         } catch (err) {
           console.warn("Erro ao buscar dados na OpenLibrary:", err);

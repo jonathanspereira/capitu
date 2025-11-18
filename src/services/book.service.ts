@@ -43,7 +43,7 @@ export class BookService {
   // Adiciona livro à lista do usuário
   public async addBookToUser(
     userId: number,
-    bookData: { title: string; author: string }
+    bookData: { title: string; author: string; thumbnail?: string; readingStatus: ReadingStatus }
   ): Promise<BookDto> {
     const existing = await prisma.book.findFirst({
       where: {
@@ -60,7 +60,8 @@ export class BookService {
         title: bookData.title,
         author: bookData.author,
         userId,
-        readingStatus: "READING",
+        readingStatus: bookData.readingStatus,
+        thumbnail: bookData.thumbnail ?? null,
       },
     });
 

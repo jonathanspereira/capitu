@@ -3,7 +3,6 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DIRECT_URL")
@@ -16,23 +15,24 @@ model Users {
   password         String
   resetToken       String?
   resetTokenExpiry DateTime? @db.Timestamp(6)
-  books            Book[]    
+  books            Book[]
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  title       String
-  author      String
-  readingStatus ReadingStatus @default(READING)
-  isFavorite  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  userId      Int
-  user        Users    @relation(fields: [userId], references: [id])
+  id            Int           @id @default(autoincrement())
+  title         String
+  author        String
+  readingStatus ReadingStatus @default(TO_READ)
+  isFavorite    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userId        Int
+  thumbnail     String?
+  user          Users         @relation(fields: [userId], references: [id])
 }
 
 enum ReadingStatus {
+  TO_READ
   READING
   READ
 }
