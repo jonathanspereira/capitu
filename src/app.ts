@@ -22,9 +22,8 @@ export class SetupApplication {
   private setupExpress(): void {
     this.app.use(
       cors({
-        origin: true,
+        origin: "*,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        credentials: true,
       })
     );
 
