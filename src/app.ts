@@ -22,7 +22,7 @@ export class SetupApplication {
   private setupExpress(): void {
     this.app.use(
       cors({
-        origin: 'http://localhost:8100',
+        origin: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         credentials: true,
       })
