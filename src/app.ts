@@ -22,7 +22,7 @@ export class SetupApplication {
   private setupExpress(): void {
     this.app.use(
       cors({
-        origin: "*,
+        origin: "*",
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       })
     );
