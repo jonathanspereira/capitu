@@ -10,13 +10,14 @@ export class BookController {
     async search(req: Request, res: Response) {
         try {
         const query = req.query.q as string;
+        const userId = req.query.userId ? Number(req.query.userId) : undefined;
         const limit = Number(req.query.limit) || 10;
 
         if (!query) {
             return res.status(400).json({ error: "Parâmetro q é obrigatório" });
         }
 
-        const books = await bookService.searchBooks(query, limit);
+        const books = await bookService.searchBooks(query, userId, limit);
         return res.json(books);
         } catch (error) {
         console.error(error);
