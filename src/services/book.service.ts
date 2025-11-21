@@ -10,50 +10,34 @@ export class BookService {
   private readonly favoriteBookService = new FavoriteBookService();
 
   // Busca livros no Google Books com informação de favoritos
-  public async searchBooks(
-    query: string,
-    userId?: number,
-    limit = 10
-  ): Promise<BookSearchResultDto[]> {
-    try {
-      // Cria um array de promessas para buscas em paralelo
-      const promises = Array.from({ length: limit }).map(() =>
-        this.googleBooksGateway.searchBook(query)
+  public async searchBooks(query: string, userId?: number, limit = 10): Promise<BookSearchResultDto[]> {
+  try {
+    const books: GoogleBook[] = [];
+    
+    const book = await this.googleBooksGateway.searchBook(query, limit);
+    if (book) books.push(...book);
+
+    if (userId) {
+      return await Promise.all(
+        books.map(async (book) => {
+          const isFavorite = await this.favoriteBookService.isFavorite(
+            userId,
+            book.id,
+            book.title,
+            book.authors?.join(', ')
+          );
+          return BookSearchResultDto.fromGoogleBook(book, isFavorite);
+        })
       );
-
-      // Aguarda todas as requisições terminarem
-      const results = await Promise.all(promises);
-
-      // Filtra resultados válidos e apenas em português
-      const books = results
-        .filter(
-          (book): book is GoogleBook =>
-            book !== null && (book.language === "pt" || book.language === "pt-BR")
-        );
-
-      // Se userId foi fornecido, verifica quais são favoritos
-      if (userId) {
-        const booksWithFavoriteStatus = await Promise.all(
-          books.map(async (book) => {
-            const isFavorite = await this.favoriteBookService.isFavorite(
-              userId,
-              book.id,
-              book.title,
-              book.authors?.join(', ')
-            );
-            return BookSearchResultDto.fromGoogleBook(book, isFavorite);
-          })
-        );
-        return booksWithFavoriteStatus;
-      }
-
-      // Caso contrário, retorna sem informação de favoritos
-      return books.map(book => BookSearchResultDto.fromGoogleBook(book));
-    } catch (err) {
-      console.error("Erro ao buscar livros no Google Books:", err);
-      return [];
     }
+
+    return books.map(book => BookSearchResultDto.fromGoogleBook(book));
+  } catch (err) {
+    console.error("Erro ao buscar livros no Google Books:", err);
+    return [];
   }
+}
+
   
   // Adiciona livro à lista do usuário
   public async addBookToUser(
