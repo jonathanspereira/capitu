@@ -10,33 +10,50 @@ export class BookService {
   private readonly favoriteBookService = new FavoriteBookService();
 
   // Busca livros no Google Books com informação de favoritos
-  public async searchBooks(query: string, userId?: number, limit = 10): Promise<BookSearchResultDto[]> {
+ public async searchBooks(
+  query: string,
+  userId?: number,
+  limit = 10
+): Promise<BookSearchResultDto[]> {
   try {
-    const books: GoogleBook[] = [];
-    
-    const book = await this.googleBooksGateway.searchBook(query, limit);
-    if (book) books.push(...book);
+    // Buscar livros no Google Books
+    const books: GoogleBook[] = await this.googleBooksGateway.searchBook(query, limit);
 
+    if (!books || books.length === 0) {
+      return [];
+    }
+
+    // Se userId foi fornecido, tenta marcar favoritos
     if (userId) {
-      return await Promise.all(
+      const booksWithFavoriteStatus = await Promise.all(
         books.map(async (book) => {
-          const isFavorite = await this.favoriteBookService.isFavorite(
-            userId,
-            book.id,
-            book.title,
-            book.authors?.join(', ')
-          );
+          let isFavorite = false;
+          try {
+            isFavorite = await this.favoriteBookService.isFavorite(
+              userId,
+              book.id,
+              book.title,
+              book.authors?.join(', ')
+            );
+          } catch (err) {
+            console.warn(`Erro ao verificar favorito para ${book.title}:`, err);
+            // continua sem quebrar a busca
+          }
           return BookSearchResultDto.fromGoogleBook(book, isFavorite);
         })
       );
+      return booksWithFavoriteStatus;
     }
 
-    return books.map(book => BookSearchResultDto.fromGoogleBook(book));
+    // Se não houver userId, retorna normalmente sem favoritos
+    return books.map((book) => BookSearchResultDto.fromGoogleBook(book));
+
   } catch (err) {
     console.error("Erro ao buscar livros no Google Books:", err);
     return [];
   }
 }
+
 
   
   // Adiciona livro à lista do usuário
