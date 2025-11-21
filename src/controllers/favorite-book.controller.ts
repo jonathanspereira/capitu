@@ -34,11 +34,12 @@ export class FavoriteBookController {
 
       // Se tem googleBookId, busca dados completos do Google Books
       if (googleBookId) {
-        const googleBook = await googleBooksGateway.searchBook(title, author);
-        if (!googleBook) {
+        const googleBooks = await googleBooksGateway.searchBook(title, author);
+        if (!googleBooks || googleBooks.length === 0) {
           return res.status(404).json({ error: 'Livro não encontrado no Google Books' });
         }
 
+        const googleBook = googleBooks[0];
         const bookData = FavoriteBookService.createFromGoogleBook(googleBook);
         const favorite = await favoriteBookService.addToFavorites(userId, bookData);
         return res.status(201).json(favorite);

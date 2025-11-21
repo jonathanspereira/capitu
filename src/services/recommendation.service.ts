@@ -51,18 +51,22 @@ export class RecommendationService {
     }
 
     const enrichedSuggestions = await Promise.allSettled(
-      suggestions.map(async (sugg) => {
+      suggestions.map(async (suggestion) => {
         try {
-          const googleData = await this.googleBooksGateway.searchBook(sugg.title, sugg.author);
+          // Busca mais específica incluindo título e autor
+          const searchQuery = `${suggestion.title} ${suggestion.author}`;
+          const googleBooks = await this.googleBooksGateway.searchBook(searchQuery, 1);
+          const googleData = googleBooks && googleBooks.length > 0 ? googleBooks[0] : undefined;
+          
           return {
-            title: sugg.title,
-            author: sugg.author,
+            title: suggestion.title,
+            author: suggestion.author,
             googleBookData: googleData || undefined,
             coverUrl: this.googleBooksGateway.getThumbnailUrl(googleData?.thumbnail),
           };
         } catch (err) {
           console.warn("Erro ao buscar dados no Google Books:", err);
-          return { title: sugg.title, author: sugg.author };
+          return { title: suggestion.title, author: suggestion.author };
         }
       })
     );
