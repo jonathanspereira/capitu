@@ -5,7 +5,8 @@ import {
   RegisterUserDto, 
   RequestPasswordResetDto, 
   ResetPasswordDto, 
-  VerifyTokenDto 
+  VerifyTokenDto,
+  DeleteUserDto
 } from "../view/dto/auth.dto";
 
 export class AuthController {
@@ -49,5 +50,19 @@ export class AuthController {
     const dto: ResetPasswordDto = req.body;
     await AuthService.resetPassword(dto);
     return res.status(200).json({ message: "Senha redefinida com sucesso" });
+  }
+
+  // 6. Deletar usuário
+  async deleteUser(req: Request, res: Response) {
+    const { password } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+
+    const dto: DeleteUserDto = { userId, password };
+    await AuthService.deleteUser(dto);
+    return res.status(200).json({ message: "Usuário deletado com sucesso" });
   }
 }

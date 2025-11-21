@@ -1,20 +1,24 @@
 import prisma from '../libs/prisma.lib';
 import { BookDto } from "../view/dto/book.dto";
 import { ReadingStatus } from "@prisma/client";
-import { OpenLibraryGateway, OpenLibraryBook } from "../gateways/openlibrary.gateway";
+import { GoogleBooksGateway, GoogleBook } from "../gateways/googlebooks.gateway";
+import { BookSearchResultDto } from "../view/dto/book-search-result.dto";
+import { FavoriteBookService } from "./favorite-book.service";
 
 export class BookService {
-  private readonly openLibraryGateway = new OpenLibraryGateway();
+  private readonly googleBooksGateway = new GoogleBooksGateway();
+  private readonly favoriteBookService = new FavoriteBookService();
 
-  // Busca livros na OpenLibrary
+  // Busca livros no Google Books com informação de favoritos
   public async searchBooks(
     query: string,
+    userId?: number,
     limit = 10
-  ): Promise<Array<OpenLibraryBook & { coverUrl?: string }>> {
+  ): Promise<BookSearchResultDto[]> {
     try {
       // Cria um array de promessas para buscas em paralelo
       const promises = Array.from({ length: limit }).map(() =>
-        this.openLibraryGateway.searchBook(query)
+        this.googleBooksGateway.searchBook(query)
       );
 
       // Aguarda todas as requisições terminarem
@@ -23,19 +27,30 @@ export class BookService {
       // Filtra resultados válidos e apenas em português
       const books = results
         .filter(
-          (book): book is OpenLibraryBook =>
-            book !== null && !!book.language?.includes("por")
-        )
-        .map((book) => ({
-          ...book,
-          coverUrl: book.cover_i
-            ? this.openLibraryGateway.getCoverUrl(book.cover_i, "L")
-            : undefined,
-        }));
+          (book): book is GoogleBook =>
+            book !== null && (book.language === "pt" || book.language === "pt-BR")
+        );
 
-      return books;
+      // Se userId foi fornecido, verifica quais são favoritos
+      if (userId) {
+        const booksWithFavoriteStatus = await Promise.all(
+          books.map(async (book) => {
+            const isFavorite = await this.favoriteBookService.isFavorite(
+              userId,
+              book.id,
+              book.title,
+              book.authors?.join(', ')
+            );
+            return BookSearchResultDto.fromGoogleBook(book, isFavorite);
+          })
+        );
+        return booksWithFavoriteStatus;
+      }
+
+      // Caso contrário, retorna sem informação de favoritos
+      return books.map(book => BookSearchResultDto.fromGoogleBook(book));
     } catch (err) {
-      console.error("Erro ao buscar livros na OpenLibrary:", err);
+      console.error("Erro ao buscar livros no Google Books:", err);
       return [];
     }
   }
@@ -43,7 +58,7 @@ export class BookService {
   // Adiciona livro à lista do usuário
   public async addBookToUser(
     userId: number,
-    bookData: { title: string; author: string; thumbnail?: string; readingStatus: ReadingStatus }
+    bookData: { title: string; author: string; thumbnail?: string; readingStatus: ReadingStatus; googleBookId?: string }
   ): Promise<BookDto> {
     const existing = await prisma.book.findFirst({
       where: {
@@ -62,6 +77,7 @@ export class BookService {
         userId,
         readingStatus: bookData.readingStatus,
         thumbnail: bookData.thumbnail ?? null,
+        // googleBookId: bookData.googleBookId ?? null, // Temporariamente comentado
       },
     });
 
@@ -81,19 +97,6 @@ export class BookService {
 
     const updated = await prisma.book.findUnique({ where: { id: bookId } });
     return updated ? BookDto.fromEntity(updated) : null;
-  }
-
-  // Marca ou desmarca livro como favorito
-  public async toggleFavorite(bookId: number, userId: number): Promise<BookDto> {
-    const book = await prisma.book.findFirst({ where: { id: bookId, userId } });
-    if (!book) throw new Error("Livro não encontrado");
-
-    const updated = await prisma.book.update({
-      where: { id: book.id },
-      data: { isFavorite: !book.isFavorite },
-    });
-
-    return BookDto.fromEntity(updated);
   }
 
   // Lista livros do usuário

@@ -1,11 +1,11 @@
 import { BookService } from "./book.service";
 import { GroqGateway } from "../gateways/groq.gateway";
-import { OpenLibraryGateway, OpenLibraryBook } from "../gateways/openlibrary.gateway";
+import { GoogleBooksGateway, GoogleBook } from "../gateways/googlebooks.gateway";
 
 export interface BookSuggestion {
   title: string;
   author: string;
-  openLibraryData?: OpenLibraryBook;
+  googleBookData?: GoogleBook;
   coverUrl?: string | null;
 }
 
@@ -13,7 +13,7 @@ export class RecommendationService {
   constructor(
     private readonly bookService: BookService,
     private readonly groqGateway: GroqGateway,
-    private readonly openLibraryGateway: OpenLibraryGateway
+    private readonly googleBooksGateway: GoogleBooksGateway
   ) {}
 
   public async generateRecommendations(userId: number): Promise<BookSuggestion[]> {
@@ -53,17 +53,15 @@ export class RecommendationService {
     const enrichedSuggestions = await Promise.allSettled(
       suggestions.map(async (sugg) => {
         try {
-          const olData = await this.openLibraryGateway.searchBook(sugg.title, sugg.author);
+          const googleData = await this.googleBooksGateway.searchBook(sugg.title, sugg.author);
           return {
             title: sugg.title,
             author: sugg.author,
-            openLibraryData: olData || undefined,
-            coverUrl: olData?.cover_i
-              ? this.openLibraryGateway.getCoverUrl(olData.cover_i, "L")
-    : undefined,
+            googleBookData: googleData || undefined,
+            coverUrl: this.googleBooksGateway.getThumbnailUrl(googleData?.thumbnail),
           };
         } catch (err) {
-          console.warn("Erro ao buscar dados na OpenLibrary:", err);
+          console.warn("Erro ao buscar dados no Google Books:", err);
           return { title: sugg.title, author: sugg.author };
         }
       })

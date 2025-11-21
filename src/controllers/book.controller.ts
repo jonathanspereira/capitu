@@ -65,23 +65,6 @@ export class BookController {
         }
     }
 
-    // Marca ou desmarca livro como favorito
-    async toggleFavorite(req: Request, res: Response) {
-        try {
-        const { bookId, userId } = req.body;
-
-        if (!bookId || !userId) {
-            return res.status(400).json({ error: "Campos obrigatórios ausentes" });
-        }
-
-        const updated = await bookService.toggleFavorite(bookId, userId);
-        return res.json(updated);
-        } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "Erro ao marcar favorito" });
-        }
-    }
-
     // Lista livros do usuário
     async listUserBooks(req: Request, res: Response) {
         try {

@@ -25,6 +25,15 @@ export interface ResetPasswordDto {
   newPassword: string;
 }
 
+export interface DeleteUserDto {
+  userId: number;
+  password: string;
+}
+
+export interface DeleteUserRequestDto {
+  password: string;
+}
+
 // --- Output DTO ---
 export interface AuthResponseDto {
   user: UserDto;

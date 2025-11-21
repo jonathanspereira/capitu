@@ -12,6 +12,7 @@ import {
   RequestPasswordResetDto,
   ResetPasswordDto,
   VerifyTokenDto,
+  DeleteUserDto,
 } from "../view/dto/auth.dto";
 
 class AuthService {
@@ -112,6 +113,34 @@ class AuthService {
       where: { id: user.id },
       data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
     });
+  }
+
+  // 6 Delete user
+  public async deleteUser(dto: DeleteUserDto): Promise<void> {
+    const { userId, password } = dto;
+    
+    if (!userId || !password) {
+      throw new BadRequestError("ID do usuário e senha são obrigatórios.");
+    }
+
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestError("Usuário não encontrado.");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new BadRequestError("Senha incorreta.");
+    }
+
+    // Deletar dados relacionados primeiro (livros e favoritos)
+    await prisma.book.deleteMany({ where: { userId } });
+    
+    // Quando o modelo FavoriteBook estiver ativo, descomentar:
+    // await prisma.favoriteBook.deleteMany({ where: { userId } });
+
+    // Deletar o usuário
+    await prisma.users.delete({ where: { id: userId } });
   }
 }
 

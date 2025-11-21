@@ -34,7 +34,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "@vitest/coverage-v8": "^4.0.2",
     "dotenv": "^17.2.3",
-    "prisma": "^6.18.0",
+    "prisma": "^6.19.0",
     "sonar-scanner": "^3.1.0",
     "sonarqube-scanner": "^4.3.2",
     "supertest": "^7.1.4",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@ai-sdk/groq": "^2.0.26",
-    "@prisma/client": "^6.18.0",
+    "@prisma/client": "^6.19.0",
     "@wesleytodd/openapi": "^1.1.0",
     "ai": "^5.0.82",
     "axios": "^1.13.1",

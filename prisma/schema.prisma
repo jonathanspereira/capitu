@@ -9,13 +9,14 @@ datasource db {
 }
 
 model Users {
-  id               Int       @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @default(autoincrement())
+  id               Int            @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @default(autoincrement())
   name             String
-  email            String    @unique(map: "UQ_97672ac88f789774dd47f7c8be3")
+  email            String         @unique(map: "UQ_97672ac88f789774dd47f7c8be3")
   password         String
   resetToken       String?
-  resetTokenExpiry DateTime? @db.Timestamp(6)
+  resetTokenExpiry DateTime?      @db.Timestamp(6)
   books            Book[]
+  favoriteBooks    FavoriteBook[]
 }
 
 model Book {
@@ -23,12 +24,28 @@ model Book {
   title         String
   author        String
   readingStatus ReadingStatus @default(TO_READ)
-  isFavorite    Boolean       @default(false)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   userId        Int
   thumbnail     String?
+  googleBookId  String?
   user          Users         @relation(fields: [userId], references: [id])
+}
+
+model FavoriteBook {
+  id            Int      @id @default(autoincrement())
+  title         String
+  author        String
+  thumbnail     String?
+  googleBookId  String?
+  description   String?
+  publishedDate String?
+  userId        Int
+  createdAt     DateTime @default(now())
+  user          Users    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, googleBookId])
+  @@unique([userId, title, author])
 }
 
 enum ReadingStatus {

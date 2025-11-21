@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { RecommendationService } from '../services/recommendation.service';
 import { GroqGateway } from '../gateways/groq.gateway';
-import { OpenLibraryGateway } from '../gateways/openlibrary.gateway';
+import { GoogleBooksGateway } from '../gateways/googlebooks.gateway';
 import { BookService } from '../services/book.service';
 
 const bookService = new BookService();
 const groqGateway = new GroqGateway();
-const openLibraryGateway = new OpenLibraryGateway();
-const recommendationService = new RecommendationService(bookService, groqGateway, openLibraryGateway);
+const googleBooksGateway = new GoogleBooksGateway();
+const recommendationService = new RecommendationService(bookService, groqGateway, googleBooksGateway);
 
 export class RecommendationController {
   public static async getSuggestions(req: Request, res: Response) {

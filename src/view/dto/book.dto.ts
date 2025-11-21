@@ -5,10 +5,11 @@ export class BookDto {
   title!: string;
   author!: string;
   readingStatus!: ReadingStatus;
-  isFavorite!: boolean;
   createdAt!: Date;
   updatedAt!: Date;
   userId!: number;
+  thumbnail?: string;
+  // googleBookId?: string; // Temporariamente comentado
 
   public static fromEntity(book: Book): BookDto {
     const dto = new BookDto();
@@ -16,10 +17,11 @@ export class BookDto {
     dto.title = book.title;
     dto.author = book.author;
     dto.readingStatus = book.readingStatus;
-    dto.isFavorite = book.isFavorite;
     dto.createdAt = book.createdAt;
     dto.updatedAt = book.updatedAt;
     dto.userId = book.userId;
+    dto.thumbnail = book.thumbnail || undefined;
+    // dto.googleBookId = book.googleBookId || undefined; // Temporariamente comentado
     return dto;
   }
 }
