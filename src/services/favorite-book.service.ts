@@ -12,8 +12,8 @@ export interface CreateFavoriteBookData {
 }
 
 export class FavoriteBookService {
-  // Serviços habilitados - banco sincronizado
   
+  // Adiciona livro aos favoritos do usuário
   public async addToFavorites(userId: number, bookData: CreateFavoriteBookData): Promise<FavoriteBookDto> {
     const favoriteBook = await (prisma as any).favoriteBook.create({
       data: {
@@ -25,12 +25,14 @@ export class FavoriteBookService {
     return FavoriteBookDto.fromEntity(favoriteBook);
   }
 
+  // Remove livro dos favoritos do usuário
   public async removeFromFavorites(userId: number, favoriteBookId: number): Promise<void> {
     await (prisma as any).favoriteBook.deleteMany({
       where: { id: favoriteBookId, userId },
     });
   }
 
+  // Lista livros favoritos do usuário
   public async listUserFavorites(userId: number): Promise<FavoriteBookDto[]> {
     const favoriteBooks = await (prisma as any).favoriteBook.findMany({
       where: { userId },
@@ -40,6 +42,7 @@ export class FavoriteBookService {
     return favoriteBooks.map(FavoriteBookDto.fromEntity);
   }
 
+  // Verifica se um livro é favorito do usuário
   public async isFavorite(userId: number, googleBookId?: string, title?: string, author?: string): Promise<boolean> {
     if (googleBookId) {
       const favorite = await (prisma as any).favoriteBook.findFirst({
@@ -58,6 +61,7 @@ export class FavoriteBookService {
     return false;
   }
 
+  // Remove livro dos favoritos do usuário por Google Book ID ou título e autor
   public async removeFromFavoritesByGoogleId(userId: number, googleBookId: string): Promise<void> {
     await (prisma as any).favoriteBook.deleteMany({
       where: { userId, googleBookId },
@@ -70,6 +74,7 @@ export class FavoriteBookService {
     });
   }
 
+  // Cria dados de livro favorito a partir de um Google Book
   public static createFromGoogleBook(googleBook: GoogleBook): CreateFavoriteBookData {
     return {
       title: googleBook.title,

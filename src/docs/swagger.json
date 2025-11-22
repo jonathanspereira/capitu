@@ -34,7 +34,14 @@
           }
         },
         "responses": {
-          "201": { "description": "Usuário registrado com sucesso" },
+          "201": { 
+            "description": "Usuário registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
           "400": { "description": "Dados inválidos" },
           "409": { "description": "E-mail já registrado" }
         }
@@ -61,6 +68,7 @@
             "description": "Login bem-sucedido",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" },
                 "example": {
                   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                   "user": {
@@ -90,26 +98,68 @@
           }
         },
         "responses": {
-          "200": { "description": "E-mail de redefinição enviado" },
-          "404": { "description": "Usuário não encontrado" }
+          "200": { 
+            "description": "Se o e-mail existir, você receberá instruções para resetar a senha",
+            "content": {
+              "application/json": {
+                "example": { "message": "Se o e-mail existir, você receberá instruções para resetar a senha." }
+              }
+            }
+          }
         }
       }
     },
     "/auth/verify-reset-token": {
-      "get": {
+      "post": {
         "summary": "Verificar validade do token de redefinição",
         "tags": ["Autenticação"],
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": { "type": "string" }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VerifyTokenRequest" },
+              "example": { "token": "abc123" }
+            }
           }
-        ],
+        },
         "responses": {
-          "200": { "description": "Token válido" },
+          "200": { 
+            "description": "Token válido",
+            "content": {
+              "application/json": {
+                "example": { "message": "Código válido" }
+              }
+            }
+          },
           "400": { "description": "Token inválido ou expirado" }
+        }
+      }
+    },
+    "/auth/delete-account": {
+      "delete": {
+        "summary": "Deletar conta do usuário autenticado",
+        "tags": ["Autenticação"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeleteAccountRequest" },
+              "example": { "password": "minhasenha123" }
+            }
+          }
+        },
+        "responses": {
+          "200": { 
+            "description": "Usuário deletado com sucesso",
+            "content": {
+              "application/json": {
+                "example": { "message": "Usuário deletado com sucesso" }
+              }
+            }
+          },
+          "401": { "description": "Usuário não autenticado ou senha incorreta" },
+          "400": { "description": "Dados inválidos" }
         }
       }
     },
@@ -130,8 +180,33 @@
           }
         },
         "responses": {
-          "200": { "description": "Senha redefinida com sucesso" },
+          "200": { 
+            "description": "Senha redefinida com sucesso",
+            "content": {
+              "application/json": {
+                "example": { "message": "Senha redefinida com sucesso" }
+              }
+            }
+          },
           "400": { "description": "Token inválido ou expirado" }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "summary": "Obter informações do perfil autenticado",
+        "tags": ["Usuário"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Perfil retornado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" }
         }
       }
     },
@@ -292,20 +367,174 @@
         }
       }
     },
-    "/user/profile": {
+    "/favorites/{userId}": {
       "get": {
-        "summary": "Obter informações do perfil autenticado",
-        "tags": ["Usuário"],
+        "summary": "Listar livros favoritos do usuário",
+        "tags": ["Favoritos"],
         "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Perfil retornado",
+            "description": "Lista de livros favoritos do usuário",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserResponse" }
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/FavoriteBookResponse" }
+                }
               }
             }
           },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Acesso negado" }
+        }
+      },
+      "post": {
+        "summary": "Adicionar livro aos favoritos",
+        "tags": ["Favoritos"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddFavoriteRequest" },
+              "example": {
+                "title": "Dom Casmurro",
+                "author": "Machado de Assis",
+                "googleBookId": "abc123xyz"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { 
+            "description": "Livro adicionado aos favoritos",
+            "content": {
+              "application/json": {
+                "example": { "message": "Livro adicionado aos favoritos!" }
+              }
+            }
+          },
+          "400": { "description": "Dados inválidos" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/favorites/{userId}/{favoriteId}": {
+      "delete": {
+        "summary": "Remover livro dos favoritos",
+        "tags": ["Favoritos"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "favoriteId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { 
+            "description": "Livro removido dos favoritos",
+            "content": {
+              "application/json": {
+                "example": { "message": "Livro removido dos favoritos!" }
+              }
+            }
+          },
+          "404": { "description": "Favorito não encontrado" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/favorites/{userId}/check": {
+      "post": {
+        "summary": "Verificar se livro é favorito",
+        "tags": ["Favoritos"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckFavoriteRequest" },
+              "example": { "googleBookId": "abc123xyz" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status do favorito",
+            "content": {
+              "application/json": {
+                "example": { "isFavorite": true, "favoriteId": 5 }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/favorites/{userId}/by-google-id": {
+      "delete": {
+        "summary": "Remover livro dos favoritos por Google Book ID",
+        "tags": ["Favoritos"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RemoveFavoriteByGoogleIdRequest" },
+              "example": { "googleBookId": "abc123xyz" }
+            }
+          }
+        },
+        "responses": {
+          "200": { 
+            "description": "Livro removido dos favoritos",
+            "content": {
+              "application/json": {
+                "example": { "message": "Livro removido dos favoritos!" }
+              }
+            }
+          },
+          "404": { "description": "Favorito não encontrado" },
           "401": { "description": "Não autenticado" }
         }
       }
@@ -380,6 +609,54 @@
         },
         "required": ["token", "newPassword"]
       },
+      "VerifyTokenRequest": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" }
+        },
+        "required": ["token"]
+      },
+      "DeleteAccountRequest": {
+        "type": "object",
+        "properties": {
+          "password": { "type": "string", "format": "password" }
+        },
+        "required": ["password"]
+      },
+      "AddFavoriteRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "googleBookId": { "type": "string" }
+        },
+        "required": ["title", "author", "googleBookId"]
+      },
+      "CheckFavoriteRequest": {
+        "type": "object",
+        "properties": {
+          "googleBookId": { "type": "string" }
+        },
+        "required": ["googleBookId"]
+      },
+      "RemoveFavoriteByGoogleIdRequest": {
+        "type": "object",
+        "properties": {
+          "googleBookId": { "type": "string" }
+        },
+        "required": ["googleBookId"]
+      },
+      "FavoriteBookResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "googleBookId": { "type": "string" },
+          "userId": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
       "BookRequest": {
         "type": "object",
         "properties": {
@@ -416,6 +693,14 @@
           "name": { "type": "string" },
           "email": { "type": "string" }
         }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" },
+          "user": { "$ref": "#/components/schemas/UserResponse" }
+        },
+        "required": ["token", "user"]
       }
     }
   },
